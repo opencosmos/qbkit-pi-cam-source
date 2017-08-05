@@ -1,0 +1,35 @@
+### Test runner makefile
+
+# Output filenames
+test_runner ?= $(outdir)/test
+
+ifneq ($(filter test, $(MAKECMDGOALS)),)
+sync_mode = none
+endif
+
+# Do not build test runner if LTO is enabled
+ifeq ($(use_lto),n)
+all: $(test_runner)
+endif
+
+ifeq ($(use_lto),n)
+.PHONY: test
+test: $(test_runner)
+	exec ./$<
+
+$(test_runner): $(tmpdir)/shakedown/test_main.o $(filter-out $(tmpdir)/shakedown/test.o $(tmpdir)/main.o, $(objects))
+	@mkdir -p -- $(@D)
+	$(call log_action, LD, $@)
+	$(LD) $(ldflags) -o $@ $^
+
+$(tmpdir)/shakedown/test_main.o: $(tmpdir)/shakedown/test.o
+	@mkdir -p -- $(@D)
+	$(call log_action, OC, $@)
+	$(OBJCOPY) --redefine-sym test_main=main $< $@
+else
+.PHONY: test
+test:
+	@echo "Cannot build test runner if link-time optimisation (-flto) is enabled"
+	@false
+endif
+

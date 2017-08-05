@@ -1,0 +1,9 @@
+[Unit]
+Description=Payload demo client
+
+[Service]
+Type=simple
+ExecStart=/root/pi-cam-demo/bin/program client /dev/ttyS4 capture /qbkit/var/images
+
+[Install]
+WantedBy=basic.target

@@ -1,0 +1,61 @@
+ssh = ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR
+
+ifneq ($(filter deploy% test%, $(MAKECMDGOALS)),)
+sync_mode = none
+endif
+
+-include keyfile
+
+payload = root@192.168.100.185
+qbkit = root@192.168.91.6 -o IdentityFile=$(keyfile)
+
+.PHONY: deploy-client
+deploy-client: cleanall
+	tar --exclude-vcs --exclude={bin,tmp,.build,.*.sw*} -cz . | $(ssh) $(qbkit)   ' \
+		set -xe; \
+		export TERM=$(TERM); \
+		rm -rf -- pi-cam-demo; \
+		mkdir -- pi-cam-demo; \
+		tar -C pi-cam-demo -xz; \
+		cd pi-cam-demo; \
+		make -B o=$(o) v4l=$(v4l); \
+		cp systemd/client.service /etc/systemd/system/picam-test.service; \
+		systemctl daemon-reload; \
+		'
+
+.PHONY: deploy-server
+deploy-server: cleanall
+	tar --exclude-vcs --exclude={bin,tmp,.build,.*.sw*} -cz . | $(ssh) $(payload) ' \
+		set -xe; \
+		export TERM=$(TERM); \
+		rm -rf -- pi-cam-demo; \
+		mkdir -- pi-cam-demo; \
+		tar -C pi-cam-demo -xz; \
+		cd pi-cam-demo; \
+		make -B o=$(o) v4l=$(v4l); \
+		cp systemd/server.service /etc/systemd/system/picam-test.service; \
+		systemctl daemon-reload; \
+		systemctl restart picam-test; \
+		'
+
+.PHONY: test-real
+test-real:
+	$(ssh) $(qbkit) ' \
+		set -xe; \
+		export TERM=$(TERM); \
+		cp pi-cam-demo/bin/program /qbkit/bin/pi-cam/; \
+		chown qbkit:qbkit /qbkit/bin/pi-cam/program; \
+		systemctl restart qbuser_capture-image; \
+		sleep 2; \
+		systemctl status -n 30 qbuser_capture-image; \
+		'
+
+.PHONY: test-test
+test-test:
+	$(ssh) $(qbkit) ' \
+		set -xe; \
+		export TERM=$(TERM); \
+		systemctl restart picam-test; \
+		sleep 2; \
+		systemctl status -n 30 picam-test; \
+		'

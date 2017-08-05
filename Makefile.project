@@ -1,0 +1,30 @@
+### Project-specific makefile
+
+# project_name = program
+# sources =
+# language = c++
+
+# cross_compile =
+# w_flags =
+# c_flags =
+# cflags +=
+# cxxflags +=
+
+# language =
+
+# defines +=
+# include_dirs +=
+# includes +=
+libs += pthread
+
+# c_std =
+# cxx_std =
+
+.DEFAULT_GOAL := all
+
+# Flag to tell server to use V4L instead of PiCam
+ifneq ($(v4l),)
+defines += USE_V4L
+endif
+
+include Makefile.deploy

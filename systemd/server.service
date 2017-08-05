@@ -1,0 +1,12 @@
+[Unit]
+Description=Payload demo server
+
+[Service]
+Type=simple
+ExecStartPre=/bin/mkdir -p /var/cache/picam
+ExecStart=/root/pi-cam-demo/bin/program server /dev/ttyAMA0
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=basic.target

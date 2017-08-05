@@ -1,0 +1,6 @@
+*.o
+*.d
+/bin
+/tmp
+/.build
+keyfile
