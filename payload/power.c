@@ -11,12 +11,19 @@ bool payload_power_on(struct uart_context *uart)
 	}
 	const time_t t0 = time(NULL);
 	loginfo("Waiting for payload to respond");
+	const unsigned total_pings = 5;
+	unsigned pending = 0;
 	do {
 		if (time(NULL) > deadline) {
 			logfail("Timed out waiting for payload to respond");
 			return false;
 		}
-	} while (!cmd_ping(uart));
+		if (cmd_ping(uart)) {
+			pending++;
+		} else {
+			pending = 0;
+		}
+	} while (pending < total_pings);
 	const time_t dt = time(NULL) - t0;
 	loginfo("Payload took %us to power up", (unsigned) dt);
 	loginfo("Waiting %us for sensor to warm up", PAYLOAD_WARM_UP_TIME_S);
