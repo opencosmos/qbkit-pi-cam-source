@@ -5,8 +5,8 @@
 #include "vars.h"
 #include "conf.h"
 
-char *capture_dir = "/var/cache/picam";
-char *capture_cmd_fmt = DEFAULT_CAPTURE_CMD_FMT;
+const char *capture_dir = "/var/cache/picam";
+const char *capture_cmd_fmt = NULL;
 
 static const char *get_capture_file(const char name_ser[CAPTURE_FILENAME_LEN])
 {
@@ -44,6 +44,10 @@ static size_t svr_capture(const struct wire_cmd_capture_req *req, struct wire_cm
 	(void) res;
 	loginfo("capture");
 	char command[200];
+	if (!capture_cmd_fmt) {
+		logfail("No capture command has been set");
+		return 0;
+	}
 	snprintf(command, sizeof(command), capture_cmd_fmt, get_capture_file(req->name));
 	loginfo("exec: %s", command);
 	return system(command) == 0 ? sizeof(*res) : 0;

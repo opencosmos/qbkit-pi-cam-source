@@ -22,9 +22,4 @@ libs += pthread
 
 .DEFAULT_GOAL := all
 
-# Flag to tell server to use V4L instead of PiCam
-ifneq ($(v4l),)
-defines += USE_V4L
-endif
-
 include Makefile.deploy

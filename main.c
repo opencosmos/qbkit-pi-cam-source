@@ -2,6 +2,8 @@
 #include "payload/client.h"
 #include "payload/server.h"
 #include "payload/power.h"
+#include "payload/vars.h"
+#include "payload/conf.h"
 
 #define BAUD B230400
 
@@ -48,6 +50,15 @@ static void init_serial(int fd, int baud)
 
 static bool run_server(struct uart_context *uart)
 {
+	const char *driver;
+	if (getenv("USE_V4L")) {
+		driver = "v4l";
+		capture_cmd_fmt = CAPTURE_V4L;
+	} else {
+		driver = "picam";
+		capture_cmd_fmt = CAPTURE_PICAM;
+	}
+	loginfo("Using %s driver, exec = %s", driver, capture_cmd_fmt);
 	const struct uart_packet *packet;
 	/* Ignore timeouts */
 	while (true) {
