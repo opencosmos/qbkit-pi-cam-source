@@ -3,6 +3,7 @@ Description=Payload demo server
 
 [Service]
 Type=simple
+# Environment=USE_V4L=''
 ExecStartPre=/bin/mkdir -p /var/cache/picam
 ExecStart=/root/pi-cam-demo/bin/program server /dev/ttyAMA0
 Restart=always
