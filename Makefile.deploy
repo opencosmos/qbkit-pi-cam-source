@@ -6,8 +6,10 @@ endif
 
 -include keyfile
 
-payload = root@192.168.100.185
-qbkit = root@192.168.91.6 -o IdentityFile=$(keyfile)
+-include ip-addresses
+
+payload = root@$(payload_ip)
+qbkit = root@$(qbkit_ip) -o IdentityFile=$(keyfile)
 
 .PHONY: deploy-client
 deploy-client: cleanall
