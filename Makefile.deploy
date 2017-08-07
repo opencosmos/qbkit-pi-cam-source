@@ -19,7 +19,9 @@ deploy-client: cleanall
 		tar -C pi-cam-demo -xz; \
 		cd pi-cam-demo; \
 		make -B o=$(o); \
-		cp systemd/client.service /etc/systemd/system/picam-test.service; \
+		if ! [ -e /etc/systemd/system/picam-test.service]; then \
+			cp systemd/client.service /etc/systemd/system/picam-test.service; \
+		fi; \
 		systemctl daemon-reload; \
 		'
 
@@ -33,7 +35,9 @@ deploy-server: cleanall
 		tar -C pi-cam-demo -xz; \
 		cd pi-cam-demo; \
 		make -B o=$(o); \
-		cp systemd/server.service /etc/systemd/system/picam-test.service; \
+		if ! [ -e /etc/systemd/system/picam-test.service]; then \
+			cp systemd/server.service /etc/systemd/system/picam-test.service; \
+		fi; \
 		systemctl daemon-reload; \
 		systemctl restart picam-test; \
 		'
