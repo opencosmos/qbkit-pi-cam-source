@@ -1,6 +1,6 @@
 #include "posix.h"
 
-int read_timeout_ms = 3000;
+int read_timeout_ms = 10000;
 
 static void file_on_tx_byte(struct uart_context *ctx, uint8_t byte)
 {
