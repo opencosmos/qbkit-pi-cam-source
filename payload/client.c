@@ -37,7 +37,9 @@ bool cmd_capture(struct uart_context *uart, struct cmd_capture_req *req, struct 
 	(void) req;
 	(void) res;
 	struct wire_cmd_capture_req _req = {
-		.hdr = { .cmd = CMD_CAPTURE }
+		.hdr = { .cmd = CMD_CAPTURE },
+		.width = swap16(req->width),
+		.height = swap16(req->height)
 	};
 	strncpy(_req.name, req->name, CAPTURE_FILENAME_LEN);
 	uart_tx_data(uart, &_req, sizeof(_req));
@@ -89,10 +91,12 @@ bool cmd_read(struct uart_context *uart, struct cmd_read_req *req, struct cmd_re
 	return true;
 }
 
-bool cmd_capture_and_save_image(struct uart_context *ctx, const char *name, const char *destname)
+bool cmd_capture_and_save_image(struct uart_context *ctx, const char *name, const char *destname, int width, int height)
 {
 	struct cmd_capture_req cq;
 	struct cmd_capture_res cr;
+	cq.width = width;
+	cq.height = height;
 	snprintf(cq.name, sizeof(cq.name), "%s", name);
 	if (!cmd_capture(ctx, &cq, &cr)) {
 		logfail("Failed to capture image");

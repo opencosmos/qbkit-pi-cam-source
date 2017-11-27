@@ -4,6 +4,12 @@
 bool payload_power_on(struct uart_context *uart)
 {
 	const time_t deadline = time(NULL) + PAYLOAD_POWER_ON_TIMEOUT_S - PAYLOAD_WARM_UP_TIME_S;
+	/* Turn off for 100ms to power cycle */
+	if (!payload_power_set("5v0", false)) {
+		logfail("Failed to initialise power line");
+		return false;
+	}
+	usleep(100000);
 	loginfo("Powering payload 5V0 on");
 	if (!payload_power_set("5v0", true)) {
 		logfail("Failed to turn power line on");

@@ -71,11 +71,11 @@ static bool run_server(struct uart_context *uart)
 	return true;
 }
 
-static bool run_client(struct uart_context *uart, const char *name, const char *path)
+static bool run_client(struct uart_context *uart, const char *name, const char *path, int width, int height)
 {
 	char dest[100];
 	snprintf(dest, sizeof(dest), "%s/%s", path, name);
-	if (!cmd_capture_and_save_image(uart, name, dest)) {
+	if (!cmd_capture_and_save_image(uart, name, dest, width, height)) {
 		logfail("Failed");
 		return false;
 	}
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 	if (server && argc != 3) {
 		goto syntax;
 	}
-	if (client && argc != 5) {
+	if (client && argc != 5 && argc != 7) {
 		goto syntax;
 	}
 	int fd = open(argv[2], O_RDWR | O_SYNC | O_NOCTTY);
@@ -111,10 +111,12 @@ int main(int argc, char *argv[])
 	if (client) {
 		const char *name = argv[3];
 		const char *path = argv[4];
+		const int width = argc == 7 ? atoi(argv[5]) : 640;
+		const int height = argc == 7 ? atoi(argv[6]) : 480;
 		if (!payload_power_on(&uart)) {
 			logfail("Payload failed to start up");
 		}
-		res = run_client(&uart, name, path);
+		res = run_client(&uart, name, path, width, height);
 		if (!payload_power_off(&uart)) {
 			logfail("Payload failed to power down");
 		}
@@ -128,6 +130,6 @@ int main(int argc, char *argv[])
 	return res ? 0 : 3;
 syntax:
 	logfail("Syntax: %s server <uart>", argv[0]);
-	logfail("Syntax: %s client <uart> <image-name> <save-path>", argv[0]);
+	logfail("Syntax: %s client <uart> <image-name> <save-path> [<width> <height>]", argv[0]);
 	return 2;
 }

@@ -32,6 +32,8 @@ CMD_READ_CS_TYPE calc_cs(const void *data, size_t length);
 
 struct cmd_capture_req
 {
+	int width;
+	int height;
 	char name[CAPTURE_FILENAME_LEN + 1];
 };
 
@@ -67,6 +69,8 @@ struct cmd_read_res
 struct __attribute__((__packed__)) wire_cmd_capture_req
 {
 	struct wire_cmd_req_header hdr;
+	uint16_t width;
+	uint16_t height;
 	char name[CAPTURE_FILENAME_LEN];
 };
 

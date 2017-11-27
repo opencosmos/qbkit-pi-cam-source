@@ -24,7 +24,7 @@ TEST_DEFINE(image)
 	pthread_create(&server_tid, NULL, server_thread, &uart_server);
 	void *pipe = create_sync_uart_pipe(&uart_server, &uart_client, UART_FRAME_SIZE + 50);
 
-	capture_cmd_fmt = "touch %s";
+	capture_cmd_fmt = "echo size=%dx%d && touch %s";
 	capture_dir = "/home/mark/Pictures";
 
 	{
@@ -34,6 +34,8 @@ TEST_DEFINE(image)
 	{
 		struct cmd_capture_req cq;
 		struct cmd_capture_res cr;
+		cq.width = 100;
+		cq.height = 75;
 		snprintf(cq.name, sizeof(cq.name), "%s", "deadpool-unicorn.jpg");
 		test_assert("Capture image (mocked implementation)", cmd_capture(&uart_client, &cq, &cr));
 	}

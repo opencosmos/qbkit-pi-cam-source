@@ -48,7 +48,9 @@ static size_t svr_capture(const struct wire_cmd_capture_req *req, struct wire_cm
 		logfail("No capture command has been set");
 		return 0;
 	}
-	snprintf(command, sizeof(command), capture_cmd_fmt, get_capture_file(req->name));
+	int width = swap16(req->width);
+	int height = swap16(req->height);
+	snprintf(command, sizeof(command), capture_cmd_fmt, width, height, get_capture_file(req->name));
 	loginfo("exec: %s", command);
 	return system(command) == 0 ? sizeof(*res) : 0;
 }
