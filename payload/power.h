@@ -1,5 +1,6 @@
 #pragma once
 #include "../stdinc.h"
+#include "../power/power.h"
 #include "../uart/proto.h"
 
 #define PAYLOAD_POWER_ON_TIMEOUT_S 60

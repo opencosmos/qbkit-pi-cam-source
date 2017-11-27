@@ -3,7 +3,7 @@ Description=Payload demo client
 
 [Service]
 Type=simple
-ExecStart=/root/pi-cam-demo/bin/program client /dev/ttyS4 capture /qbkit/var/images
+ExecStart=/root/pi-cam-demo/bin/program client /qbkit/interfaces/payload_uart capture /qbkit/var/images
 
 [Install]
 WantedBy=basic.target
