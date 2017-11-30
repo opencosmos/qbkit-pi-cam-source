@@ -91,13 +91,17 @@ int main(int argc, char *argv[])
 	}
 	bool client = strcmp(argv[1], "client") == 0;
 	bool server = strcmp(argv[1], "server") == 0;
-	if (client == server) {
+	bool ping = strcmp(argv[1], "ping") == 0;
+	if (client + server + ping != 1) {
 		goto syntax;
 	}
 	if (server && argc != 3) {
 		goto syntax;
 	}
 	if (client && argc != 5 && argc != 7) {
+		goto syntax;
+	}
+	if (ping && argc != 3) {
 		goto syntax;
 	}
 	int fd = open(argv[2], O_RDWR | O_SYNC | O_NOCTTY);
@@ -108,16 +112,29 @@ int main(int argc, char *argv[])
 	init_serial(fd, BAUD);
 	map_uart_file(&uart, fd);
 	bool res;
-	if (client) {
+	if (ping) {
+		struct timespec t0;
+		struct timespec t1;
+		clock_gettime(CLOCK_MONOTONIC, &t0);
+		res = cmd_ping(&uart);
+		clock_gettime(CLOCK_MONOTONIC, &t1);
+		uint64_t ns = (t1.tv_sec - t0.tv_sec) * 1000000000 + ((int64_t) t1.tv_nsec - t0.tv_nsec);
+		if (res) {
+			loginfo("Ping! %.3fms", ns * 1e-6);
+		} else {
+			logfail("No reply to ping");
+		}
+	} else if (client) {
 		const char *name = argv[3];
 		const char *path = argv[4];
 		const int width = argc == 7 ? atoi(argv[5]) : 640;
 		const int height = argc == 7 ? atoi(argv[6]) : 480;
-		if (!payload_power_on(&uart)) {
+		const bool mock_power = getenv("MOCK_POWER");
+		if (!mock_power && !payload_power_on(&uart)) {
 			logfail("Payload failed to start up");
 		}
 		res = run_client(&uart, name, path, width, height);
-		if (!payload_power_off(&uart)) {
+		if (!mock_power && !payload_power_off(&uart)) {
 			logfail("Payload failed to power down");
 		}
 	} else {
@@ -129,6 +146,7 @@ int main(int argc, char *argv[])
 	}
 	return res ? 0 : 3;
 syntax:
+	logfail("Syntax: %s ping <uart>", argv[0]);
 	logfail("Syntax: %s server <uart>", argv[0]);
 	logfail("Syntax: %s client <uart> <image-name> <save-path> [<width> <height>]", argv[0]);
 	return 2;
